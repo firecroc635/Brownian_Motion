@@ -7,6 +7,7 @@ from pygame.locals import *
 pygame.init()
 #frames/ticks
 clock = pygame.time.Clock()
+Frames = 60
 #setting the screen
 bg_width, bg_height = 1280, 720
 screen = pygame.display.set_mode([bg_width,bg_height])
@@ -22,6 +23,9 @@ start = True
 balls = []
 #ticks
 tick = 0
+#pause
+pause = 0
+priorPause = 0
 #particle size
 ballsize = 4.5
 #list cap - temporary
@@ -71,22 +75,29 @@ def displayingText(text, x, y, colour, fontt):
     ren7 = fontt.render(text,1,colour)
     screen.blit(ren7,(x,y))
 #collider count
-def collisioncounter(colydercount, lists, r, g, b):
-    colydercount = int(colydercount) + 1
-    if lists == 1:
-        r += 1
-        g += 0
-        b += 0
-        return colydercount, r, g, b
-    elif lists == 2:
-        r += 0
-        g += 1
-        b += 0
-        return colydercount, r, g, b
+def collisioncounter(colydercount, lists, r, g, b, pause):
+    if pause != 1:
+        colydercount = int(colydercount) + 1
+        if lists == 1:
+            r += 1
+            g += 0
+            b += 0
+            return colydercount, r, g, b
+        elif lists == 2:
+            r += 0
+            g += 1
+            b += 0
+            return colydercount, r, g, b
+        else:
+            r += 0
+            g += 0
+            b += 1
+            return colydercount, r, g, b
     else:
+        colydercount += 0
         r += 0
         g += 0
-        b += 1
+        b += 0
         return colydercount, r, g, b
 #starting accelerators of the particles
 def rando(lis, Sped):
@@ -149,10 +160,10 @@ while running:
                 exit()
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 320 and listLim < 275):
+        if event.type == pygame.MOUSEBUTTONDOWN or event.type == KEYDOWN:
+            if 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 320 and listLim < 275) or event.key == K_UP:
 
-                balls.append([randint(minX,maxX), randint(minY, maxY), 0, 0, randint(1,3)])
+                balls.append([randint(minX,maxX), randint(minY, maxY), 0, 0, randint(1,3), 1])
 
                 if balls[listLim][4] == 1:
                     g += 1
@@ -166,7 +177,7 @@ while running:
                     rando(balls[listLim], RedSped)
                 listLim += 1
 
-            elif 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 410)  and listLim > 0:
+            elif 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 410)  and listLim > 0 or event.key == K_DOWN:
 
                 if balls[listLim - 1][4] == 1:
                     g -= 1
@@ -176,6 +187,12 @@ while running:
                     r -= 1
                 balls.pop(listLim - 1)
                 listLim -= 1
+            elif 1200 <= pygame.mouse.get_pos()[0] <= 1260 and (650 <= pygame.mouse.get_pos()[1] <= 710) or event.key == K_SPACE and priorPause == 1:
+                pause = 0
+                priorPause = 0
+            elif 1130 <= pygame.mouse.get_pos()[0] <= 1190 and (650 <= pygame.mouse.get_pos()[1] <= 710) or event.key == K_SPACE and priorPause == 0:
+                pause = 1
+                priorPause = 1
     #background
     screen.fill((50,50,50))
 
@@ -188,25 +205,25 @@ while running:
             j[1] -= ballsize
             j[3] *= -1
             collisY = False
-            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount)
+            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount, pause)
         #colission with top of the screen
         if j[1] <= 0 + ballsize and collisX == True:
             j[1] += ballsize
             j[3] *= -1
             collisX = False
-            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount)
+            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount, pause)
         #right screen collision
         if j[0] >= 1280 - ballsize and collisY == True:
             j[0] -= ballsize
             j[2] *= -1
             collisY = False
-            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount)
+            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount, pause)
         #left screen collision
         if j[0] <= 150 + ballsize and collisX == True:
             j[0] += ballsize
             j[2] *= -1
             collisX = False
-            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount)
+            colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount, pause)
 
         #allow collision to turn back on
         if j[1] <= 710 - ballsize:
@@ -236,10 +253,11 @@ while running:
                         j[2] *= -1
                         j[3] *= -1
                         i[2] *= -1
-                    colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount)
+                    colydercount, redCount, greenCount, blueCount = collisioncounter(colydercount, j[4], redCount, greenCount, blueCount, pause)
         #adding movement
-        j[0] += j[2]
-        j[1] += j[3]
+        if pause == 0:
+            j[0] += j[2]
+            j[1] += j[3]
 
         #displaying the particles
         if j[4] == 1:
@@ -266,6 +284,21 @@ while running:
     #deducting button
     outlineRect(outline, (180,180,140), 40, 350, 70, 60, 10)
     pygame.draw.rect(screen,(100,100,100),[45, 355, 60, 50], 5)
+
+    #pausing and resuming button
+    #resuming
+    outlineRect(outline, (170,170,170), 1200, 650, 60, 60, 5)
+    pygame.draw.rect(screen,(100,100,100),[1205, 655, 50, 50], 2)
+
+    pygame.draw.polygon(screen,(100,100,100),[(1220, 665), (1240,680), (1220, 695) ])
+
+    #pausing
+    outlineRect(outline, (170,170,170), 1130, 650, 60, 60, 5)
+    pygame.draw.rect(screen,(100,100,100),[1135, 655, 50, 50], 2)
+
+    pygame.draw.rect(screen,(100,100,100),[1147, 660, 10, 40])
+    pygame.draw.rect(screen,(100,100,100),[1165, 660, 10, 40])
+
     #displaying balls on the stastistics
     for i in balls:
         pygame.draw.circle(screen,(100,220,100),(20 + (ballsize + 8),105),  10)
@@ -308,20 +341,21 @@ while running:
 
     displayingText(str(average) + '/S', 10, 680, numbers, font2)
 
-    if tick % 60 == 0:
+    if tick % Frames == 0 and pause == 0:
         deducter += 1
         print(colydercount)
         if deducter == 1:
             bec = colydercount
-        if deducter == 2:
+        if deducter == 2 and pause == 0:
             average = (colydercount - bec) / 2
             print(average)
             deducter = 0
+
 
     #graphis end
     #counting every tick/frames
     tick += 1
     #other stuff I need to do for this shit to work
     start = False
-    clock.tick(60)
+    clock.tick(Frames)
     pygame.display.flip()
