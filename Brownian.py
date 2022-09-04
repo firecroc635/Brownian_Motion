@@ -155,14 +155,43 @@ while running:
     #don't worry about these
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
-        if event.type == KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             if event.key == K_ESCAPE:
                 exit()
+            elif event.key == K_UP:
+                balls.append([randint(minX,maxX), randint(minY, maxY), 0, 0, randint(1,3), 1])
+
+                if balls[listLim][4] == 1:
+                    g += 1
+                    rando(balls[listLim], GreSped)
+                elif balls[listLim][4] == 2:
+                    b+= 1
+                    rando(balls[listLim], BluSped)
+
+                elif balls[listLim][4] == 3:
+                    r += 1
+                    rando(balls[listLim], RedSped)
+                listLim += 1
+            elif event.key == K_DOWN:
+                if balls[listLim - 1][4] == 1:
+                    g -= 1
+                elif balls[listLim - 1][4] == 2:
+                    b -= 1
+                else:
+                    r -= 1
+                balls.pop(listLim - 1)
+                listLim -= 1
+            elif event.key == K_SPACE and priorPause == 1:
+                pause = 0
+                priorPause = 0
+            elif event.key == K_SPACE and priorPause == 0:
+                pause = 1
+                priorPause = 1
+
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN or event.type == KEYDOWN:
-            if 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 320 and listLim < 275) or event.key == K_UP:
-
+        if event.type == pygame.MOUSEBUTTONDOWN or (event.type == pygame.KEYDOWN):
+            if 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 320 and listLim < 275):
                 balls.append([randint(minX,maxX), randint(minY, maxY), 0, 0, randint(1,3), 1])
 
                 if balls[listLim][4] == 1:
@@ -177,7 +206,7 @@ while running:
                     rando(balls[listLim], RedSped)
                 listLim += 1
 
-            elif 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 410)  and listLim > 0 or event.key == K_DOWN:
+            elif 40 <= pygame.mouse.get_pos()[0] <= 110 and (260 <= pygame.mouse.get_pos()[1] <= 410)  and listLim > 0:
 
                 if balls[listLim - 1][4] == 1:
                     g -= 1
@@ -187,10 +216,10 @@ while running:
                     r -= 1
                 balls.pop(listLim - 1)
                 listLim -= 1
-            elif 1200 <= pygame.mouse.get_pos()[0] <= 1260 and (650 <= pygame.mouse.get_pos()[1] <= 710) or event.key == K_SPACE and priorPause == 1:
+            elif 1200 <= pygame.mouse.get_pos()[0] <= 1260 and (650 <= pygame.mouse.get_pos()[1] <= 710):
                 pause = 0
                 priorPause = 0
-            elif 1130 <= pygame.mouse.get_pos()[0] <= 1190 and (650 <= pygame.mouse.get_pos()[1] <= 710) or event.key == K_SPACE and priorPause == 0:
+            elif 1130 <= pygame.mouse.get_pos()[0] <= 1190 and (650 <= pygame.mouse.get_pos()[1] <= 710):
                 pause = 1
                 priorPause = 1
     #background
